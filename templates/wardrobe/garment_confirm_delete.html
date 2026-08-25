@@ -1,0 +1,3 @@
+{% extends "base.html" %}
+{% block title %}Delete {{ garment.name }} · Outfit Generator{% endblock %}
+{% block content %}<div class="container py-5"><div class="confirm-card"><div class="display-5">🗑️</div><h1 class="h3">Remove {{ garment.name }}?</h1><p class="text-secondary">This removes the garment from your wardrobe and from any saved outfits that use it.</p><form method="post">{% csrf_token %}<button class="btn btn-danger" type="submit">Yes, delete it</button><a class="btn btn-outline-dark" href="{% url 'wardrobe:garment_list' %}">Keep garment</a></form></div></div>{% endblock %}

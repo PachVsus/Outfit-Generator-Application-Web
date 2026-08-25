@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Outfit Generator — Your wardrobe, remixed{% endblock %}
+{% block content %}
+<section class="hero overflow-hidden">
+  <div class="container py-5">
+    <div class="row align-items-center g-5 py-lg-5">
+      <div class="col-lg-7">
+        <span class="eyebrow">YOUR WARDROBE, REMIXED</span>
+        <h1 class="display-3 fw-bold mt-3">The outfit you want is already in your closet.</h1>
+        <p class="lead text-secondary my-4">Turn the clothes you own into a visual wardrobe, filter by style and weather, and discover combinations worth wearing again.</p>
+        <div class="d-flex flex-wrap gap-3"><a class="btn btn-brand btn-lg" href="{% url 'accounts:signup' %}">Build my wardrobe</a><a class="btn btn-outline-dark btn-lg" href="{% url 'accounts:login' %}">I already have an account</a></div>
+        <p class="small text-secondary mt-3">🔒 Private by default · No social feed · Your clothes, your account</p>
+      </div>
+      <div class="col-lg-5">
+        <div class="hero-stack" aria-label="Example outfit categories">
+          <div class="look-card card-a"><span>01</span><strong>Shirt</strong><small>Casual · Navy</small></div>
+          <div class="look-card card-b"><span>02</span><strong>Pants</strong><small>Classic · Beige</small></div>
+          <div class="look-card card-c"><span>03</span><strong>Shoes</strong><small>Minimalist · White</small></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="container py-5">
+  <div class="row g-4 text-center">
+    <div class="col-md-4"><div class="feature-card"><div class="feature-icon">📸</div><h2 class="h5">Capture your closet</h2><p>Add photos, colors, categories, styles, and weather preferences.</p></div></div>
+    <div class="col-md-4"><div class="feature-card"><div class="feature-icon">🎲</div><h2 class="h5">Generate combinations</h2><p>Create a complete outfit from garments that match your filters.</p></div></div>
+    <div class="col-md-4"><div class="feature-card"><div class="feature-icon">⭐</div><h2 class="h5">Keep the good ones</h2><p>Name and save combinations so your favorites never get forgotten.</p></div></div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Build a private visual wardrobe and discover new outfit combinations.">
+  <title>{% block title %}Outfit Generator{% endblock %}</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+  <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.8/dist/htmx.min.js" defer></script>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark app-nav sticky-top">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="{% url 'home' %}">👔 Outfit Generator</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+      <div class="collapse navbar-collapse" id="mainNav">
+        {% if user.is_authenticated %}
+          <div class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+            <a class="nav-link" href="{% url 'wardrobe:dashboard' %}">Dashboard</a>
+            <a class="nav-link" href="{% url 'wardrobe:garment_list' %}">Wardrobe</a>
+            <a class="nav-link" href="{% url 'wardrobe:generator' %}">Generate</a>
+            <a class="nav-link" href="{% url 'wardrobe:outfit_list' %}">Saved outfits</a>
+            <form action="{% url 'accounts:logout' %}" method="post" class="ms-lg-2">{% csrf_token %}<button class="btn btn-sm btn-outline-light" type="submit">Log out</button></form>
+          </div>
+        {% else %}
+          <div class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+            <a class="nav-link" href="{% url 'accounts:login' %}">Log in</a>
+            <a class="btn btn-sm btn-light text-dark px-3" href="{% url 'accounts:signup' %}">Create account</a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </nav>
+
+  {% if messages %}<div class="container mt-3">{% for message in messages %}<div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">{{ message }}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>{% endfor %}</div>{% endif %}
+  <main>{% block content %}{% endblock %}</main>
+  <footer class="container py-5 text-center text-secondary small">Your wardrobe stays yours. Built with Django and a little style. ✨</footer>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
