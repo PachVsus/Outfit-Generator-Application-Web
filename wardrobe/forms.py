@@ -9,7 +9,7 @@ MAX_IMAGE_SIZE = 8 * 1024 * 1024
 ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png", "image/webp"}
 ALLOWED_IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
 
-
+## Form classes for the wardrobe app, including forms for garments, outfit generation, and outfit saving.
 class BootstrapFormMixin:
     def apply_bootstrap(self):
         for field in self.fields.values():
@@ -17,17 +17,21 @@ class BootstrapFormMixin:
             field.widget.attrs["class"] = css
 
 
+## Form class for creating and updating Garment instances, with validation for image size and type.
 class GarmentForm(BootstrapFormMixin, forms.ModelForm):
+    # Meta class to specify the model and fields for the GarmentForm, as well as custom widgets for the image field.
     class Meta:
         model = Garment
         fields = ("image", "name", "clothing_type", "main_color", "secondary_color", "style", "weather")
         widgets = {"image": forms.ClearableFileInput(attrs={"accept": "image/jpeg,image/png,image/webp"})}
 
+    # Initialize the GarmentForm, setting the secondary color field as optional and applying Bootstrap styling to all fields.
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["secondary_color"].required = False
         self.apply_bootstrap()
 
+    # Clean method for the image field, validating the image size and type against defined constraints.
     def clean_image(self):
         image = self.cleaned_data.get("image")
         if not image:
@@ -42,7 +46,7 @@ class GarmentForm(BootstrapFormMixin, forms.ModelForm):
             raise forms.ValidationError("Use a JPG, PNG, or WebP image.")
         return image
 
-
+## Form class for generating outfits based on selected style and weather criteria.
 class GeneratorForm(BootstrapFormMixin, forms.Form):
     style = forms.ChoiceField(choices=(("Any", "Any style"),) + tuple((style, style) for style in STYLES))
     weather = forms.ChoiceField(choices=tuple((weather, weather) for weather in WEATHERS))
@@ -51,7 +55,7 @@ class GeneratorForm(BootstrapFormMixin, forms.Form):
         super().__init__(*args, **kwargs)
         self.apply_bootstrap()
 
-
+## Form class for saving generated outfits.
 class OutfitSaveForm(BootstrapFormMixin, forms.Form):
     name = forms.CharField(max_length=120, required=False, widget=forms.TextInput(attrs={"placeholder": "Optional outfit name"}))
 

@@ -8,12 +8,12 @@ def delete_file(field_file):
     if field_file and field_file.name:
         field_file.storage.delete(field_file.name)
 
-
+# Signal receiver to delete the image file associated with a Garment instance when the instance is deleted.
 @receiver(post_delete, sender=Garment)
 def remove_deleted_garment_image(sender, instance, **kwargs):
     delete_file(instance.image)
 
-
+# Signal receiver to delete the old image file associated with a Garment instance when the image is replaced with a new one.
 @receiver(pre_save, sender=Garment)
 def remove_replaced_garment_image(sender, instance, **kwargs):
     if not instance.pk:

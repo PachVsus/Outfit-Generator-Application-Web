@@ -4,6 +4,7 @@ from . import views
 
 app_name = "wardrobe"
 
+# URL patterns for the wardrobe app, mapping URLs to their corresponding view functions.
 urlpatterns = [
     path("", views.dashboard, name="dashboard"),
     path("wardrobe/", views.garment_list, name="garment_list"),

@@ -9,13 +9,13 @@ from .forms import GarmentForm, GeneratorForm, OutfitSaveForm
 from .models import Garment, Outfit
 from .services import generate_outfit
 
-
+# View functions for the wardrobe app, handling requests related to garments and outfits.
 def home(request):
     if request.user.is_authenticated:
         return redirect("wardrobe:dashboard")
     return render(request, "home.html")
 
-
+# View function for the dashboard, displaying counts of garments, outfits, and categories, as well as recent garments and outfits.
 @login_required
 def dashboard(request):
     garments = request.user.garments.all()
@@ -28,7 +28,7 @@ def dashboard(request):
     }
     return render(request, "wardrobe/dashboard.html", context)
 
-
+# View function to list garments, with optional filtering by search query, clothing type, and style.
 @login_required
 def garment_list(request):
     garments = request.user.garments.all()
@@ -48,7 +48,7 @@ def garment_list(request):
         "filters": {"q": search, "type": clothing_type, "style": style},
     })
 
-
+# View function to create a new garment.
 @login_required
 def garment_create(request):
     form = GarmentForm(request.POST or None, request.FILES or None)
@@ -60,7 +60,7 @@ def garment_create(request):
         return redirect("wardrobe:garment_list")
     return render(request, "wardrobe/garment_form.html", {"form": form, "title": "Add a garment", "submit_label": "Add to wardrobe"})
 
-
+# View function to update an existing garment.
 @login_required
 def garment_update(request, pk):
     garment = get_object_or_404(Garment, pk=pk, owner=request.user)
@@ -71,7 +71,7 @@ def garment_update(request, pk):
         return redirect("wardrobe:garment_list")
     return render(request, "wardrobe/garment_form.html", {"form": form, "garment": garment, "title": "Edit garment", "submit_label": "Save changes"})
 
-
+# View function to delete a garment.
 @login_required
 def garment_delete(request, pk):
     garment = get_object_or_404(Garment, pk=pk, owner=request.user)
@@ -84,7 +84,7 @@ def garment_delete(request, pk):
         return redirect("wardrobe:garment_list")
     return render(request, "wardrobe/garment_confirm_delete.html", {"garment": garment})
 
-
+# View function for the outfit generator, allowing users to generate outfits based on selected criteria.
 @login_required
 def generator(request):
     form = GeneratorForm(request.POST or None)
@@ -98,7 +98,7 @@ def generator(request):
             return render(request, "wardrobe/partials/generated_outfit.html", context)
     return render(request, "wardrobe/generator.html", {"form": form, "selected": selected, "save_form": OutfitSaveForm()})
 
-
+# View function to save a generated outfit.
 @login_required
 def save_generated_outfit(request):
     if request.method != "POST":
@@ -125,19 +125,20 @@ def save_generated_outfit(request):
     messages.error(request, "Please check the outfit name.")
     return redirect("wardrobe:generator")
 
-
+## View functions for outfits
 @login_required
 def outfit_list(request):
     outfits = request.user.outfits.prefetch_related("garments")
     return render(request, "wardrobe/outfit_list.html", {"outfits": outfits})
 
 
+## View function to display the details of a specific outfit, including its garments.
 @login_required
 def outfit_detail(request, pk):
     outfit = get_object_or_404(Outfit.objects.prefetch_related("garments"), pk=pk, owner=request.user)
     return render(request, "wardrobe/outfit_detail.html", {"outfit": outfit})
 
-
+## View function to delete a specific outfit.
 @login_required
 def outfit_delete(request, pk):
     outfit = get_object_or_404(Outfit, pk=pk, owner=request.user)
