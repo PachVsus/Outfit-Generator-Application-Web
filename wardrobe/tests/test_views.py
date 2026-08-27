@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import reverse
 
-from wardrobe.models import Garment, Outfit
+from wardrobe.models import Garment, GarmentStyle, Outfit
 
 
 class OwnershipTests(TestCase):
@@ -14,10 +14,10 @@ class OwnershipTests(TestCase):
             name="Other user's jacket",
             clothing_type="Jacket",
             main_color="Black",
-            style="Casual",
             weather="Cold",
             image="garments/private.jpg",
         )
+        self.private_garment.styles.add(GarmentStyle.objects.get(name="Casual"))
         self.client.force_login(self.owner)
 
     def test_wardrobe_list_excludes_other_users_items(self):

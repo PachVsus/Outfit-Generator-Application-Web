@@ -5,12 +5,22 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 
-from .constants import CLOTHING_TYPES, COLORS, STYLES, WEATHERS
+from .constants import CLOTHING_TYPES, COLORS, WEATHERS
 
 # Utility function to generate a unique upload path for garment images based on the owner's ID and a UUID.
 def garment_upload_path(instance, filename):
     extension = Path(filename).suffix.lower()
     return f"garments/user_{instance.owner_id}/{uuid.uuid4().hex}{extension}"
+
+class GarmentStyle(models.Model):
+    name = models.CharField(max_length=40, unique=True)
+
+    class Meta:
+        ordering = ("name",)
+
+    def __str__(self):
+        return self.name
+
 
 # Garment model representing individual clothing items in the user's wardrobe.
 class Garment(models.Model):
@@ -19,7 +29,7 @@ class Garment(models.Model):
     clothing_type = models.CharField(max_length=20, choices=CLOTHING_TYPES)
     main_color = models.CharField(max_length=30, choices=[(color, color) for color in COLORS])
     secondary_color = models.CharField(max_length=30, choices=[(color, color) for color in COLORS], blank=True)
-    style = models.CharField(max_length=40, choices=[(style, style) for style in STYLES])
+    styles = models.ManyToManyField(GarmentStyle, related_name="garments")
     weather = models.CharField(max_length=10, choices=[(weather, weather) for weather in WEATHERS], default="Any")
     image = models.ImageField(upload_to=garment_upload_path)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -30,7 +40,6 @@ class Garment(models.Model):
         ordering = ("-created_at",)
         indexes = [
             models.Index(fields=("owner", "clothing_type")),
-            models.Index(fields=("owner", "style")),
         ]
 
     # String representation of the Garment model, returning the name and clothing type.

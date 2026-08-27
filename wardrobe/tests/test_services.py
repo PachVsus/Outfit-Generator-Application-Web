@@ -3,7 +3,7 @@ import random
 from django.contrib.auth.models import User
 from django.test import TestCase
 
-from wardrobe.models import Garment
+from wardrobe.models import Garment, GarmentStyle
 from wardrobe.services import generate_outfit
 
 
@@ -11,23 +11,24 @@ class GeneratorServiceTests(TestCase):
     def setUp(self):
         self.user = User.objects.create_user("stylist", password="test-password-123")
 
-    def garment(self, **overrides):
+    def garment(self, styles=("Casual",), **overrides):
         values = {
             "owner": self.user,
             "name": "Test garment",
             "clothing_type": "Shirt",
             "main_color": "Black",
-            "style": "Casual",
             "weather": "Any",
             "image": "garments/test.jpg",
         }
         values.update(overrides)
-        return Garment.objects.create(**values)
+        garment = Garment.objects.create(**values)
+        garment.styles.add(*GarmentStyle.objects.filter(name__in=styles))
+        return garment
 
     def test_returns_one_matching_item_per_category(self):
         shirt = self.garment(name="Warm shirt", weather="Warm")
         shoes = self.garment(name="Shoes", clothing_type="Shoes")
-        self.garment(name="Cold goth shirt", style="Goth", weather="Cold")
+        self.garment(name="Cold goth shirt", styles=("Goth",), weather="Cold")
 
         result = generate_outfit(self.user.garments.all(), "Casual", "Warm", random.Random(3))
 
@@ -36,8 +37,18 @@ class GeneratorServiceTests(TestCase):
 
     def test_never_selects_another_users_garments_when_given_owned_queryset(self):
         stranger = User.objects.create_user("stranger")
-        Garment.objects.create(owner=stranger, name="Private shirt", clothing_type="Shirt", main_color="Red", style="Casual", weather="Any", image="garments/private.jpg")
+        private = Garment.objects.create(owner=stranger, name="Private shirt", clothing_type="Shirt", main_color="Red", weather="Any", image="garments/private.jpg")
+        private.styles.add(GarmentStyle.objects.get(name="Casual"))
 
         result = generate_outfit(self.user.garments.all())
 
         self.assertEqual(result, [])
+
+    def test_one_garment_can_match_multiple_styles(self):
+        garment = self.garment(name="Flexible jacket", clothing_type="Jacket", styles=("Casual", "Streetwear"))
+
+        casual = generate_outfit(self.user.garments.all(), "Casual")
+        streetwear = generate_outfit(self.user.garments.all(), "Streetwear")
+
+        self.assertEqual(casual, [garment])
+        self.assertEqual(streetwear, [garment])

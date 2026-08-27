@@ -16,8 +16,10 @@ A private, responsive web application for cataloging clothes, generating style-a
 ## ✨ Features
 
 - Secure registration, login, and user-owned wardrobes
+- Editable user profiles, password changes, and permanent account deletion
+- One-hour, single-use password reset links by email
 - Garment photo uploads with file type and size validation
-- Clothing categories, colors, styles, and weather preferences
+- Clothing categories, colors, multiple styles per garment, and weather preferences
 - Search and filterable visual wardrobe
 - Random outfit generation with one matching item per category
 - Persistent saved outfits
@@ -48,6 +50,8 @@ python manage.py test
 ```
 
 The test suite covers outfit filtering, category uniqueness, authentication, and cross-user authorization boundaries.
+
+During local development, password-reset messages are printed in the server console. For production, configure `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`, `EMAIL_USE_TLS`, and `DEFAULT_FROM_EMAIL` with your email provider's SMTP values.
 
 ## 🗂️ Structure
 

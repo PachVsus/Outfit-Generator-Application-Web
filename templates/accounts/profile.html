@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}My profile · Outfit Generator{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <div class="form-shell m-0 w-100">
+        <span class="eyebrow">ACCOUNT DETAILS</span>
+        <h1 class="h2 mt-2">My profile</h1>
+        <p class="text-secondary">Update the name, username, and email attached to your wardrobe.</p>
+        <form method="post" class="row g-3">
+          {% csrf_token %}
+          {% for field in form %}
+            <div class="{% if field.name == 'first_name' or field.name == 'last_name' %}col-md-6{% else %}col-12{% endif %}">
+              <label class="form-label fw-semibold" for="{{ field.id_for_label }}">{{ field.label }}</label>
+              {{ field }}
+              {% if field.help_text %}<div class="form-text">{{ field.help_text|safe }}</div>{% endif %}
+              {% for error in field.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+            </div>
+          {% endfor %}
+          <div class="col-12"><button class="btn btn-brand" type="submit">Save profile</button></div>
+        </form>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <aside class="profile-actions">
+        <h2 class="h5">Security</h2>
+        <p class="small text-secondary">Change your password regularly and keep it unique.</p>
+        <a class="btn btn-outline-dark w-100" href="{% url 'accounts:password_change' %}">Change password</a>
+        <hr>
+        <h2 class="h5 text-danger">Delete account</h2>
+        <p class="small text-secondary">Permanently remove your profile, wardrobe photos, and saved outfits.</p>
+        <a class="btn btn-outline-danger w-100" href="{% url 'accounts:delete_account' %}">Delete my account</a>
+      </aside>
+    </div>
+  </div>
+</div>
+{% endblock %}

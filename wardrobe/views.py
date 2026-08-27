@@ -4,9 +4,9 @@ from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
-from .constants import CLOTHING_TYPES, STYLES
+from .constants import CLOTHING_TYPES
 from .forms import GarmentForm, GeneratorForm, OutfitSaveForm
-from .models import Garment, Outfit
+from .models import Garment, GarmentStyle, Outfit
 from .services import generate_outfit
 
 # View functions for the wardrobe app, handling requests related to garments and outfits.
@@ -18,7 +18,7 @@ def home(request):
 # View function for the dashboard, displaying counts of garments, outfits, and categories, as well as recent garments and outfits.
 @login_required
 def dashboard(request):
-    garments = request.user.garments.all()
+    garments = request.user.garments.prefetch_related("styles")
     context = {
         "garment_count": garments.count(),
         "outfit_count": request.user.outfits.count(),
@@ -31,7 +31,7 @@ def dashboard(request):
 # View function to list garments, with optional filtering by search query, clothing type, and style.
 @login_required
 def garment_list(request):
-    garments = request.user.garments.all()
+    garments = request.user.garments.prefetch_related("styles")
     search = request.GET.get("q", "").strip()
     clothing_type = request.GET.get("type", "")
     style = request.GET.get("style", "")
@@ -40,11 +40,11 @@ def garment_list(request):
     if clothing_type:
         garments = garments.filter(clothing_type=clothing_type)
     if style:
-        garments = garments.filter(style=style)
+        garments = garments.filter(styles__name=style)
     return render(request, "wardrobe/garment_list.html", {
         "garments": garments,
         "clothing_types": CLOTHING_TYPES,
-        "styles": STYLES,
+        "styles": GarmentStyle.objects.all(),
         "filters": {"q": search, "type": clothing_type, "style": style},
     })
 
@@ -56,6 +56,7 @@ def garment_create(request):
         garment = form.save(commit=False)
         garment.owner = request.user
         garment.save()
+        form.save_m2m()
         messages.success(request, f"{garment.name} was added to your wardrobe.")
         return redirect("wardrobe:garment_list")
     return render(request, "wardrobe/garment_form.html", {"form": form, "title": "Add a garment", "submit_label": "Add to wardrobe"})
@@ -90,7 +91,7 @@ def generator(request):
     form = GeneratorForm(request.POST or None)
     selected = []
     if request.method == "POST" and form.is_valid():
-        selected = generate_outfit(request.user.garments.all(), **form.cleaned_data)
+        selected = generate_outfit(request.user.garments.prefetch_related("styles"), **form.cleaned_data)
         request.session["generated_outfit"] = [garment.pk for garment in selected]
         request.session["generated_filters"] = form.cleaned_data
         context = {"selected": selected, "save_form": OutfitSaveForm(), "filters": form.cleaned_data}

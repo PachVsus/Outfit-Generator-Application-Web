@@ -23,6 +23,7 @@
             <a class="nav-link" href="{% url 'wardrobe:garment_list' %}">Wardrobe</a>
             <a class="nav-link" href="{% url 'wardrobe:generator' %}">Generate</a>
             <a class="nav-link" href="{% url 'wardrobe:outfit_list' %}">Saved outfits</a>
+            <a class="nav-link" href="{% url 'accounts:profile' %}">My profile</a>
             <form action="{% url 'accounts:logout' %}" method="post" class="ms-lg-2">{% csrf_token %}<button class="btn btn-sm btn-outline-light" type="submit">Log out</button></form>
           </div>
         {% else %}

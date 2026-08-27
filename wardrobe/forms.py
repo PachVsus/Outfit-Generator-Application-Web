@@ -3,7 +3,7 @@ from pathlib import Path
 from django import forms
 
 from .constants import CLOTHING_TYPES, STYLES, WEATHERS
-from .models import Garment
+from .models import Garment, GarmentStyle
 
 MAX_IMAGE_SIZE = 8 * 1024 * 1024
 ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png", "image/webp"}
@@ -13,22 +13,32 @@ ALLOWED_IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
 class BootstrapFormMixin:
     def apply_bootstrap(self):
         for field in self.fields.values():
-            css = "form-select" if isinstance(field.widget, forms.Select) else "form-control"
+            if isinstance(field.widget, forms.CheckboxSelectMultiple):
+                css = "style-checkboxes"
+            else:
+                css = "form-select" if isinstance(field.widget, forms.Select) else "form-control"
             field.widget.attrs["class"] = css
 
 
 ## Form class for creating and updating Garment instances, with validation for image size and type.
 class GarmentForm(BootstrapFormMixin, forms.ModelForm):
+    styles = forms.ModelMultipleChoiceField(
+        queryset=GarmentStyle.objects.none(),
+        widget=forms.CheckboxSelectMultiple,
+        help_text="Select every style that suits this garment.",
+    )
+
     # Meta class to specify the model and fields for the GarmentForm, as well as custom widgets for the image field.
     class Meta:
         model = Garment
-        fields = ("image", "name", "clothing_type", "main_color", "secondary_color", "style", "weather")
+        fields = ("image", "name", "clothing_type", "main_color", "secondary_color", "styles", "weather")
         widgets = {"image": forms.ClearableFileInput(attrs={"accept": "image/jpeg,image/png,image/webp"})}
 
     # Initialize the GarmentForm, setting the secondary color field as optional and applying Bootstrap styling to all fields.
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["secondary_color"].required = False
+        self.fields["styles"].queryset = GarmentStyle.objects.all()
         self.apply_bootstrap()
 
     # Clean method for the image field, validating the image size and type against defined constraints.
